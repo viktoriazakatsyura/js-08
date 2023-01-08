@@ -36,51 +36,34 @@
 //   feedbackForm['message'].value = '';
 // });
 
-const throttle = require('lodash.throttle');
+import throttle from 'lodash.throttle';
 
 const form = document.querySelector('.feedback-form');
-const STORAGE_KEY = 'feedback-form-state';
+// const STORAGE_KEY = 'feedback-form-state';
 
-let objectStorage = {
-  email: '',
-  message: '',
-};
+form.addEventListener('input', throttle(onFormData, 500));
+form.addEventListener('submit', onSubmitForm);
 
-getInputFromLS();
+const formData = {};
 
-function getInputFromLS() {
-  try {
-    const dataLS = localStorage.getItem(STORAGE_KEY);
-    if (!dataLS) return;
-    objectStorage = JSON.parse(dataLS);
-    for (let key in objectStorage) {
-      form.elements[key].value = objectStorage[key];
-    }
-  } catch (error) {
-    console.log('Get state error: ', error.message);
-  }
+function onFormData(e) {
+  formData[e.target.name] = e.target.value;
+  localStorage.setItem('feedback-form-state', JSON.stringify(formData));
 }
 
-function onFormInput(e) {
-  objectStorage[e.target.name] = e.target.value.trim();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(objectStorage));
-}
-
-function onFormSubmit(e) {
+function onSubmitForm(e) {
+  console.log(JSON.parse(localStorage.getItem('feedback-form-state')));
   e.preventDefault();
-
-  const { email, message } = e.currentTarget.elements;
-
-  const formData = {
-    email: email.value,
-    message: message.value,
-  };
-
-  console.log('This is Form Data:', formData);
-
   e.currentTarget.reset();
-  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem('feedback-form-state');
 }
 
-form.addEventListener('input', throttle(onFormInput, 500));
-form.addEventListener('submit', onFormSubmit);
+(function getDateFromLS() {
+  const data = JSON.parse(localStorage.getItem('feedback-form-state'));
+  const email = document.querySelector('.feedback-form input');
+  const message = document.querySelector('.feedback-form textarea');
+  if (data) {
+    email.value = data.email;
+    message.value = data.message;
+  }
+})();
