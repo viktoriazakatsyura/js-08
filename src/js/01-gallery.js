@@ -8,13 +8,14 @@ const galleryContainer = document.querySelector('.gallery');
 const createGalleryEl = createGallery(galleryItems);
 galleryContainer.innerHTML = createGalleryEl;
 
+let gallery = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionDelay: 250,
+});
+
 galleryContainer.addEventListener('click', event => {
   event.preventDefault();
 
-  let gallery = new SimpleLightbox('.gallery a', {
-    captionsData: 'alt',
-    captionDelay: 250,
-  });
   gallery.on('show.simplelightbox', function () {
     console.log(gallery);
   });
