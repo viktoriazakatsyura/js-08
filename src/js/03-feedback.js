@@ -39,31 +39,47 @@
 import throttle from 'lodash.throttle';
 
 const form = document.querySelector('.feedback-form');
-// const STORAGE_KEY = 'feedback-form-state';
+const STORAGE_KEY = 'feedback-form-state';
+let formData = {};
 
 form.addEventListener('input', throttle(onFormData, 500));
 form.addEventListener('submit', onSubmitForm);
 
-const formData = {};
-
-function onFormData(e) {
-  formData[e.target.name] = e.target.value;
-  localStorage.setItem('feedback-form-state', JSON.stringify(formData));
-}
+getDataFromStorage();
 
 function onSubmitForm(e) {
-  console.log(JSON.parse(localStorage.getItem('feedback-form-state')));
   e.preventDefault();
+
+  const formLenght = e.currentTarget.elements.length - 1;
+
+  if (Object.keys(formData).length !== formLenght) {
+    alert('Enter data');
+    return;
+  }
+
   e.currentTarget.reset();
-  localStorage.removeItem('feedback-form-state');
+  localStorage.removeItem(STORAGE_KEY);
+  console.log(formData);
+  formData = {};
 }
 
-(function getDateFromLS() {
-  const data = JSON.parse(localStorage.getItem('feedback-form-state'));
-  const email = document.querySelector('.feedback-form input');
-  const message = document.querySelector('.feedback-form textarea');
-  if (data) {
-    email.value = data.email;
-    message.value = data.message;
+function onFormData(e) {
+  formData[e.target.name] = e.target.value.trim();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+}
+
+function getDataFromStorage() {
+  const saveMessage = localStorage.getItem(STORAGE_KEY);
+
+  if (saveMessage) {
+    try {
+      formData = JSON.parse(saveMessage);
+
+      Object.entries(formData).forEach(
+        ([name, value]) => (form.elements[name].value = value)
+      );
+    } catch (error) {
+      console.log(error.message);
+    }
   }
-})();
+}
